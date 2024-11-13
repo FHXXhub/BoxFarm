@@ -1,0 +1,150 @@
+-- Create the ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Create the frame (550x315 size)
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 550, 0, 315)  -- Adjusted size
+Frame.Position = UDim2.new(0.5, -275, 0.5, -157)  -- Centered on the screen
+Frame.BackgroundColor3 = Color3.fromRGB(32, 32, 32)  -- #202020 background color
+Frame.BorderSizePixel = 0
+Frame.Parent = ScreenGui
+
+-- Create the frame title
+local FrameTitle = Instance.new("TextLabel")
+FrameTitle.Size = UDim2.new(1, 0, 0, 40)  -- Title height adjusted
+FrameTitle.Position = UDim2.new(0, 0, 0, 0)
+FrameTitle.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- #000000 title bar color
+FrameTitle.Text = "FHXX HUB Auto Farm"
+FrameTitle.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White text
+FrameTitle.Font = Enum.Font.SourceSansBold
+FrameTitle.TextSize = 24  -- Title font size
+FrameTitle.Parent = Frame
+
+-- Create the button
+local Button = Instance.new("TextButton")
+Button.Size = UDim2.new(0, 520, 0, 50) -- Button width adjusted
+Button.Position = UDim2.new(0.5, -260, 0.5, -25)  -- Centered within the frame
+Button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- #000000 button background
+Button.Text = "Autofarm: OFF"
+Button.TextColor3 = Color3.fromRGB(242, 243, 243)  -- Light grey text
+Button.Font = Enum.Font.SourceSansBold
+Button.TextSize = 20  -- Slightly smaller button text size
+Button.Parent = Frame
+
+-- Variables for drag functionality
+local dragging = false
+local dragInput, mousePos, framePos
+
+-- Function to update the frame's position
+local function update(input)
+    local delta = input.Position - mousePos
+    Frame.Position = UDim2.new(framePos.X.Scale, framePos.X.Offset + delta.X, framePos.Y.Scale, framePos.Y.Offset + delta.Y)
+end
+
+Frame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        mousePos = input.Position
+        framePos = Frame.Position
+
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+Frame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
+    end
+end)
+
+-- Autofarm logic
+local autofarmOn = false
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+-- Movement positions (the waypoints you want to move through)
+local positions = {
+    {-552, 4, -83}, {-552, 4, -86}, {-549, 4, -83}, {-546, 4, -83}, 
+    {-544, 4, -83}, {-541, 4, -83}, {-538, 4, -83}, {-536, 4, -82}, 
+    {-532, 3, -81}, {-530, 3, -81}, {-528, 3, -81}, {-527, 3, -81}, 
+    {-524, 3, -81}, {-521, 3, -81}, {-518, 3, -81}, {-515, 3, -80}, 
+    {-513, 3, -80}, {-511, 3, -80}, {-508, 3, -79}, {-505, 3, -79}, 
+    {-499, 3, -79}, {-495, 3, -78}, {-492, 3, -78}, {-487, 3, -78}, 
+    {-483, 3, -77}, {-479, 3, -77}, {-474, 3, -77}, {-471, 3, -76}, 
+    {-468, 3, -76}, {-463, 3, -76}, {-460, 3, -76}, {-458, 4, -76}, 
+    {-455, 4, -75}, {-452, 4, -75}, {-449, 4, -75}, {-445, 4, -74}, 
+    {-440, 3, -74}, {-437, 3, -74}, {-434, 3, -74}, {-430, 3, -73}, 
+    {-427, 3, -73}, {-424, 3, -73}, {-421, 3, -73}, {-418, 3, -72}, 
+    {-415, 3, -72}, {-413, 3, -72}, {-410, 3, -72}, {-407, 3, -72}, 
+    {-404, 3, -72}, {-401, 3, -72}, 
+}
+
+-- Function to hold the "E" key
+local function holdKeyE(duration)
+    local VirtualInputManager = game:GetService("VirtualInputManager")
+    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+    wait(duration)
+    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+end
+
+-- Function to move to positions and then reverse the movement
+local isRunning = false  -- Flag to track if autofarm is running
+
+local function moveToPositions()
+    while autofarmOn do  -- Keep moving indefinitely while autofarm is ON
+        if not isRunning then  -- Prevent starting a new round if it's already running
+            isRunning = true
+            -- Move forward through the positions
+            for _, pos in ipairs(positions) do
+                humanoidRootPart.CFrame = CFrame.new(unpack(pos))
+                wait(0.3)  -- 0.3-second delay between moves
+                -- Simulate holding "E" at specific checkpoints
+                if (pos[1] == -552 and pos[3] == -86) or (pos[1] == -401 and pos[3] == -72) then
+                    holdKeyE(1)  -- Hold "E" for 1 second
+                end
+            end
+            -- After completing a lap, move in reverse through the positions
+            for i = #positions, 1, -1 do
+                local pos = positions[i]
+                humanoidRootPart.CFrame = CFrame.new(unpack(pos))
+                wait(0.3)  -- 0.3-second delay between moves
+                -- Simulate holding "E" at specific checkpoints
+                if (pos[1] == -552 and pos[3] == -86) or (pos[1] == -401 and pos[3] == -72) then
+                    holdKeyE(1)  -- Hold "E" for 1 second
+                end
+            end
+            isRunning = false
+        end
+        wait(0.3)  -- Wait a bit before starting the next round
+    end
+end
+
+-- Function to toggle the autofarm
+local function toggleAutofarm()
+    autofarmOn = not autofarmOn
+    Button.Text = autofarmOn and "Autofarm: ON" or "Autofarm: OFF"
+    
+    -- Change button color depending on autofarm state
+    Button.BackgroundColor3 = autofarmOn and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(0, 0, 0)  -- Green when ON, Black when OFF
+    Button.TextColor3 = autofarmOn and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(242, 243, 243)  -- White when ON, Light grey when OFF
+
+    if autofarmOn then
+        -- Start the movement loop in a coroutine to prevent blocking the button interaction
+        coroutine.wrap(moveToPositions)()
+    end
+end
+
+-- Connect the button click event to toggle the autofarm
+Button.MouseButton1Click:Connect(toggleAutofarm)
