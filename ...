@@ -91,12 +91,12 @@ local positions = {
     {-404, 3, -72}, {-401, 3, -72}, 
 }
 
--- Function to hold the "E" key
-local function holdKeyE(duration)
+-- Function to hold a key for a specific duration
+local function holdKey(key, duration)
     local VirtualInputManager = game:GetService("VirtualInputManager")
-    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+    VirtualInputManager:SendKeyEvent(true, key, false, game)
     wait(duration)
-    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+    VirtualInputManager:SendKeyEvent(false, key, false, game)
 end
 
 -- Function to move to positions and then reverse the movement
@@ -106,13 +106,20 @@ local function moveToPositions()
     while autofarmOn do  -- Keep moving indefinitely while autofarm is ON
         if not isRunning then  -- Prevent starting a new round if it's already running
             isRunning = true
+            local halfway = math.floor(#positions / 2)  -- Find the midpoint of the positions
             -- Move forward through the positions
-            for _, pos in ipairs(positions) do
+            for i, pos in ipairs(positions) do
                 humanoidRootPart.CFrame = CFrame.new(unpack(pos))
                 wait(0.3)  -- 0.3-second delay between moves
+                
                 -- Simulate holding "E" at specific checkpoints
                 if (pos[1] == -552 and pos[3] == -86) or (pos[1] == -401 and pos[3] == -72) then
-                    holdKeyE(1)  -- Hold "E" for 1 second
+                    holdKey(Enum.KeyCode.E, 1)  -- Hold "E" for 1 second
+                end
+                
+                -- Press "3" once at the middle of the lap (after reaching halfway)
+                if i == halfway then
+                    holdKey(Enum.KeyCode.Three, 0.1)  -- Press "3" for 0.1 seconds
                 end
             end
             -- After completing a lap, move in reverse through the positions
@@ -122,7 +129,7 @@ local function moveToPositions()
                 wait(0.3)  -- 0.3-second delay between moves
                 -- Simulate holding "E" at specific checkpoints
                 if (pos[1] == -552 and pos[3] == -86) or (pos[1] == -401 and pos[3] == -72) then
-                    holdKeyE(1)  -- Hold "E" for 1 second
+                    holdKey(Enum.KeyCode.E, 1)  -- Hold "E" for 1 second
                 end
             end
             isRunning = false
@@ -141,8 +148,7 @@ local function toggleAutofarm()
     Button.TextColor3 = autofarmOn and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(242, 243, 243)  -- White when ON, Light grey when OFF
 
     if autofarmOn then
-        -- Start the movement loop in a coroutine to prevent blocking the button interaction
-        coroutine.wrap(moveToPositions)()
+        moveToPositions()  -- Start the autofarm
     end
 end
 
