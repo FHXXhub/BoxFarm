@@ -2,35 +2,64 @@
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
--- Create the frame (550x315 size)
+-- Create the frame with rounded corners and gradient background
 local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 550, 0, 315)  -- Adjusted size
-Frame.Position = UDim2.new(0.5, -275, 0.5, -157)  -- Centered on the screen
-Frame.BackgroundColor3 = Color3.fromRGB(32, 32, 32)  -- #202020 background color
+Frame.Size = UDim2.new(0, 600, 0, 350)  -- Adjusted size
+Frame.Position = UDim2.new(0.5, -300, 0.5, -175)  -- Centered on the screen
+Frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)  -- Dark grey background
 Frame.BorderSizePixel = 0
 Frame.Parent = ScreenGui
 
--- Create the frame title
+-- Add rounded corners to the frame (top and bottom corners)
+local UICornerTop = Instance.new("UICorner")
+UICornerTop.CornerRadius = UDim.new(0, 30)  -- Rounded top corners with a larger radius
+UICornerTop.Parent = Frame
+
+local UICornerBottom = Instance.new("UICorner")
+UICornerBottom.CornerRadius = UDim.new(0, 15)  -- Rounded bottom corners with a smaller radius
+UICornerBottom.Parent = Frame
+
+-- Create a gradient background for the frame
+local UIGradient = Instance.new("UIGradient")
+UIGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 50, 50)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(80, 80, 80))
+})
+UIGradient.Parent = Frame
+
+-- Create the frame title with new font style and size
 local FrameTitle = Instance.new("TextLabel")
-FrameTitle.Size = UDim2.new(1, 0, 0, 40)  -- Title height adjusted
+FrameTitle.Size = UDim2.new(1, 0, 0, 50)  -- Title height adjusted
 FrameTitle.Position = UDim2.new(0, 0, 0, 0)
-FrameTitle.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- #000000 title bar color
-FrameTitle.Text = "FHXX HUB Auto Farm"
+FrameTitle.BackgroundColor3 = Color3.fromRGB(40, 40, 40)  -- Dark title background
+FrameTitle.Text = "FHXX's Box AutoFarm"
 FrameTitle.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White text
-FrameTitle.Font = Enum.Font.SourceSansBold
-FrameTitle.TextSize = 24  -- Title font size
+FrameTitle.Font = Enum.Font.GothamBold
+FrameTitle.TextSize = 28  -- Larger font size for title
+FrameTitle.TextStrokeTransparency = 0.5  -- Add some stroke for effect
 FrameTitle.Parent = Frame
 
--- Create the button
+-- Add rounded corners to the title bar
+local TitleUICorner = Instance.new("UICorner")
+TitleUICorner.CornerRadius = UDim.new(0, 30)  -- Same radius as the top of the frame
+TitleUICorner.Parent = FrameTitle
+
+-- Create the button with a new style
 local Button = Instance.new("TextButton")
-Button.Size = UDim2.new(0, 520, 0, 50) -- Button width adjusted
-Button.Position = UDim2.new(0.5, -260, 0.5, -25)  -- Centered within the frame
-Button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- #000000 button background
+Button.Size = UDim2.new(0, 560, 0, 60)  -- Button width adjusted
+Button.Position = UDim2.new(0.5, -280, 0.5, -30)  -- Centered within the frame
+Button.BackgroundColor3 = Color3.fromRGB(30, 30, 30)  -- Gray background for the button
 Button.Text = "Autofarm: OFF"
-Button.TextColor3 = Color3.fromRGB(242, 243, 243)  -- Light grey text
-Button.Font = Enum.Font.SourceSansBold
-Button.TextSize = 20  -- Slightly smaller button text size
+Button.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White text
+Button.Font = Enum.Font.GothamBold
+Button.TextSize = 22  -- Button font size
+Button.TextStrokeTransparency = 0.4  -- Add a stroke effect to the text
 Button.Parent = Frame
+
+-- Add rounded corners to the button
+local ButtonUICorner = Instance.new("UICorner")
+ButtonUICorner.CornerRadius = UDim.new(0, 15)  -- Rounded corners for the button
+ButtonUICorner.Parent = Button
 
 -- Variables for drag functionality
 local dragging = false
@@ -89,6 +118,7 @@ local positions = {
     {-427, 3, -73}, {-424, 3, -73}, {-421, 3, -73}, {-418, 3, -72}, 
     {-415, 3, -72}, {-413, 3, -72}, {-410, 3, -72}, {-407, 3, -72}, 
     {-404, 3, -72}, {-401, 3, -72}, 
+    
 }
 
 -- Function to hold a key for a specific duration
@@ -144,7 +174,7 @@ local function toggleAutofarm()
     Button.Text = autofarmOn and "Autofarm: ON" or "Autofarm: OFF"
     
     -- Change button color depending on autofarm state
-    Button.BackgroundColor3 = autofarmOn and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(0, 0, 0)  -- Green when ON, Black when OFF
+    Button.BackgroundColor3 = autofarmOn and Color3.fromRGB(30, 30, 30) or Color3.fromRGB(30, 30, 30)  -- Lighter green when ON
     Button.TextColor3 = autofarmOn and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(242, 243, 243)  -- White when ON, Light grey when OFF
 
     if autofarmOn then
